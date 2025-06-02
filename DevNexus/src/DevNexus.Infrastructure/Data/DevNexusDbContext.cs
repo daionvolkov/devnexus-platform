@@ -3,12 +3,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DevNexus.Infrastructure.Data
 {
-    public class DevNexusDbContext : DbContext
+    public class DevNexusDbContext(DbContextOptions<DevNexusDbContext> options) : DbContext(options)
     {
-        public DevNexusDbContext(DbContextOptions<DevNexusDbContext> options)
-            : base(options)
-        { }
-
         public DbSet<User> Users { get; set; } = null!;
         public DbSet<Course> Courses { get; set; } = null!;
         public DbSet<Enrollment> Enrollments { get; set; } = null!;
@@ -27,19 +23,17 @@ namespace DevNexus.Infrastructure.Data
                 entity.Property(u => u.FullName).IsRequired().HasMaxLength(100).HasColumnName("full_name");
                 entity.Property(u => u.Role).HasConversion<int>().IsRequired().HasColumnName("role");
                 entity.Property(u => u.RegisteredAt).HasDefaultValueSql("now()").HasColumnName("registered_at");
-
-
             });
 
-            // Course
             modelBuilder.Entity<Course>(entity =>
             {
                 entity.ToTable("courses");
                 entity.HasKey(c => c.Id);
-                entity.Property(c => c.Title).IsRequired().HasMaxLength(200);
-                entity.Property(c => c.Description).HasMaxLength(2000);
-                entity.Property(c => c.Status).HasConversion<int>().IsRequired();
-                entity.Property(c => c.CreatedAt).HasDefaultValueSql("now()");
+                entity.Property(u => u.Id).HasColumnName("id");
+                entity.Property(c => c.Title).IsRequired().HasMaxLength(200).HasColumnName("title");
+                entity.Property(c => c.Description).HasMaxLength(2000).HasColumnName("description");
+                entity.Property(c => c.Status).HasConversion<int>().IsRequired().HasColumnName("status");
+                entity.Property(c => c.CreatedAt).HasDefaultValueSql("now()").HasColumnName("created_at");
 
                 entity.HasOne(c => c.Author)
                       .WithMany()
@@ -47,13 +41,12 @@ namespace DevNexus.Infrastructure.Data
                       .OnDelete(DeleteBehavior.Restrict);
             });
 
-            // Enrollment
             modelBuilder.Entity<Enrollment>(entity =>
             {
                 entity.ToTable("enrollments");
-                entity.HasKey(e => e.Id);
-                entity.Property(e => e.Status).HasConversion<int>().IsRequired();
-                entity.Property(e => e.EnrolledAt).HasDefaultValueSql("now()");
+                entity.HasKey(e => e.Id).HasName("id");
+                entity.Property(e => e.Status).HasConversion<int>().IsRequired().HasColumnName("status");
+                entity.Property(e => e.EnrolledAt).HasDefaultValueSql("now()").HasColumnName("enrolled_at");
 
                 entity.HasOne(e => e.User)
                       .WithMany()
@@ -72,27 +65,20 @@ namespace DevNexus.Infrastructure.Data
 
                 entity.HasKey(l => l.Id);
 
-                entity.Property(l => l.Id)
-                    .HasColumnName("id");
+                entity.Property(l => l.Id).HasColumnName("id");
 
-                entity.Property(l => l.Title)
-                    .HasColumnName("title")
-                    .HasMaxLength(200)
+                entity.Property(l => l.Title).HasColumnName("title").HasMaxLength(200)
                     .IsRequired();
 
-                entity.Property(l => l.Language)
-                    .HasColumnName("language")
+                entity.Property(l => l.Language).HasColumnName("language")
                     .IsRequired();
 
-                entity.Property(l => l.Level)
-                    .HasColumnName("level")
+                entity.Property(l => l.Level).HasColumnName("level")
                     .IsRequired();
 
-                entity.Property(l => l.Content)
-                    .HasColumnName("content");
+                entity.Property(l => l.Content).HasColumnName("content");
 
-                entity.Property(l => l.AuthorId)
-                    .HasColumnName("author_id")
+                entity.Property(l => l.AuthorId).HasColumnName("author_id")
                     .IsRequired();
 
                 entity.Property(l => l.CreatedAt)
@@ -104,7 +90,6 @@ namespace DevNexus.Infrastructure.Data
                     .WithMany(u => u.Lessons)
                     .HasForeignKey(l => l.AuthorId)
                     .OnDelete(DeleteBehavior.Cascade);
-
             });
 
         }

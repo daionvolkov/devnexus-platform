@@ -4,47 +4,39 @@ using Microsoft.EntityFrameworkCore;
 
 namespace DevNexus.Application.Services
 {
-    public class LessonService
+    public abstract class LessonService(DevNexusDbContext context)
     {
-        private readonly DevNexusDbContext _context;
+        public async Task<IEnumerable<Lesson>> GetAllLessonsAsync() => await context.Lessons.ToListAsync();
 
-        public LessonService(DevNexusDbContext context)
-        {
-            _context = context;
-        }
-
-
-        public async Task<IEnumerable<Lesson>> GetAllLessonsAsync() => await _context.Lessons.ToListAsync();
-
-        public async Task<Lesson?> GetByIdAsync(int id) => await _context.Lessons.FindAsync(id);
+        public async Task<Lesson?> GetByIdAsync(int id) => await context.Lessons.FindAsync(id);
 
 
         public async Task<Lesson> CreateAsync(Lesson lesson)
         {
             lesson.CreatedAt = DateTime.UtcNow;
-            _context.Lessons.Add(lesson);
-            await _context.SaveChangesAsync();
+            context.Lessons.Add(lesson);
+            await context.SaveChangesAsync();
             return lesson;
         }
 
 
         public async Task<bool> UpdateAsync(Lesson lesson)
         {
-            var existing = await _context.Lessons.FindAsync(lesson.Id);
+            var existing = await context.Lessons.FindAsync(lesson.Id);
             if (existing == null) return false;
             existing.Title = lesson.Title;
            
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
             return true;
         }
 
 
         public async Task<bool> DeleteAsync(int id)
         {
-            var lesson = await _context.Lessons.FindAsync(id);
+            var lesson = await context.Lessons.FindAsync(id);
             if (lesson == null) return false;
-            _context.Lessons.Remove(lesson);
-            await _context.SaveChangesAsync();
+            context.Lessons.Remove(lesson);
+            await context.SaveChangesAsync();
             return true;
         }
 

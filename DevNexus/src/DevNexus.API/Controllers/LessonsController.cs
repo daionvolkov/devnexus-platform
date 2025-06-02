@@ -7,54 +7,46 @@ namespace DevNexus.API.Controllers
 
     [ApiController]
     [Route("api/[controller]")]
-    public class LessonsController : ControllerBase
+    public class LessonsController(LessonService lessonService) : ControllerBase
     {
-
-        private readonly LessonService _lessonService;
-
-        public LessonsController(LessonService lessonService)
-        {
-            _lessonService = lessonService;
-        }
-
         [HttpGet]
-        public async Task<IActionResult> GetAll()
-          => Ok(await _lessonService.GetAllLessonsAsync());
+        public async Task<ActionResult> GetAll()
+          => Ok(await lessonService.GetAllLessonsAsync());
 
 
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult> GetById(int id)
         {
-            var lesson = await _lessonService.GetByIdAsync(id);
+            var lesson = await lessonService.GetByIdAsync(id);
             return lesson == null ? NotFound() : Ok(lesson);
         }
 
 
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] Lesson lesson)
+        public async Task<ActionResult> Create([FromBody] Lesson lesson)
         {
-            var created = await _lessonService.CreateAsync(lesson);
+            var created = await lessonService.CreateAsync(lesson);
             return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
 
 
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] Lesson lesson)
+        [HttpPut("{id:int}")]
+        public async Task<ActionResult> Update(int id, [FromBody] Lesson lesson)
         {
             if (id != lesson.Id) return BadRequest();
-            var updated = await _lessonService.UpdateAsync(lesson);
+            var updated = await lessonService.UpdateAsync(lesson);
             return updated ? NoContent() : NotFound();
         }
 
 
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        [HttpDelete("{id:int}")]
+        public async Task<ActionResult> Delete(int id)
         {
-            var deleted = await _lessonService.DeleteAsync(id);
+            var deleted = await lessonService.DeleteAsync(id);
             return deleted ? NoContent() : NotFound();
         }
     }
